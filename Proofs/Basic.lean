@@ -44,34 +44,31 @@ theorem palindrome_is_irregular : ¬palindrome.IsRegular := by
   refine fooling_set_argument F ?_
   intro i j i_ne_j
   exists (List.replicate i zero) -- distinguishing suffix: 0^i
-  apply And.intro _ _
-  · -- 0^i 1^i ∈ L01 (take n=i)
-    rw [palindrome, Set.mem_setOf_eq]
-    simp [F]
-  · -- 0^j 1^i ∉ palindrome by element comparison
-    rw [palindrome, Set.mem_setOf_eq]
-    simp [F]
-    intro hn
-    have str_diff := congrArg (fun str => str.getD i zero) hn
 
-    have x : (List.replicate j zero ++ one :: List.replicate i zero).length = j + 1 + i := by
-      simp
-      omega
+  rw [palindrome, Set.mem_setOf_eq, Set.mem_setOf_eq]
 
-    simp [x] at str_diff
+  simp [F] -- reduces to yz case: 0^j 1 0^i ≠ 0^i 1 0^j
+  intro hn
+  have str_diff := congrArg (fun str => str.getD i zero) hn
 
-    /-
+  have x : (List.replicate j zero ++ one :: List.replicate i zero).length = j + 1 + i := by
+    simp
+    omega
+
+  simp [x] at str_diff
+
+  /-
 Prove: i ≠ j => 0^j 1 0^i ≠ 0^i 1 0^j
 if i < j:
-  consider the i'th element of each string
-  0^j 1 0^i has i'th element 0
-  0^i 1 0^j has i'th element 1
-    -/
-    cases lt_or_gt_of_ne i_ne_j with
-    | inl i_lt_j =>
-      simp [i_lt_j] at str_diff
-      contradiction
-    | inr j_lt_i =>
-      simp [List.getElem_append, List.getElem_cons] at str_diff
-      simp [j_lt_i, Nat.lt_asymm, Nat.sub_ne_zero_of_lt] at str_diff
-      contradiction
+consider the i'th element of each string
+0^j 1 0^i has i'th element 0
+0^i 1 0^j has i'th element 1
+  -/
+  cases lt_or_gt_of_ne i_ne_j with
+  | inl i_lt_j =>
+    simp [i_lt_j] at str_diff
+    contradiction
+  | inr j_lt_i =>
+    simp [List.getElem_append, List.getElem_cons] at str_diff
+    simp [j_lt_i, Nat.lt_asymm, Nat.sub_ne_zero_of_lt] at str_diff
+    contradiction
