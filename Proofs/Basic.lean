@@ -14,7 +14,7 @@ def L01 : Language Bool :=
 theorem L01_is_irregular : ¬L01.IsRegular := by
   let F := fun n => List.replicate n zero -- fooling set: 0^n
   refine fooling_set_argument F ?_
-  intro i j i_ne_j
+  intro i j i_lt_j
   exists (List.replicate i one) -- distinguishing suffix: 1^i
   apply And.intro _ _
   · -- 0^i 1^i ∈ L01 (take n=i)
@@ -33,8 +33,7 @@ theorem L01_is_irregular : ¬L01.IsRegular := by
       simp [F, List.count_replicate, zero, one] at this
       exact this
 
-    rw [i_eq_n, j_eq_n] at i_ne_j
-    exact i_ne_j rfl
+    omega
 
 def palindrome : Language Bool :=
   { w | w = w.reverse }
@@ -42,7 +41,7 @@ def palindrome : Language Bool :=
 theorem palindrome_is_irregular : ¬palindrome.IsRegular := by
   let F := fun n => (List.replicate n zero) ++ [one] -- fooling set: 0^n 1
   refine fooling_set_argument F ?_
-  intro i j i_ne_j
+  intro i j i_lt_j
   exists (List.replicate i zero) -- distinguishing suffix: 0^i
 
   rw [palindrome, Set.mem_setOf_eq, Set.mem_setOf_eq]
@@ -55,20 +54,5 @@ theorem palindrome_is_irregular : ¬palindrome.IsRegular := by
     simp
     omega
 
-  simp [x] at str_diff
-
-  /-
-Prove: i ≠ j => 0^j 1 0^i ≠ 0^i 1 0^j
-if i < j:
-consider the i'th element of each string
-0^j 1 0^i has i'th element 0
-0^i 1 0^j has i'th element 1
-  -/
-  cases lt_or_gt_of_ne i_ne_j with
-  | inl i_lt_j =>
-    simp [i_lt_j] at str_diff
-    contradiction
-  | inr j_lt_i =>
-    simp [List.getElem_append, List.getElem_cons] at str_diff
-    simp [j_lt_i, Nat.lt_asymm, Nat.sub_ne_zero_of_lt] at str_diff
-    contradiction
+  simp [x, i_lt_j] at str_diff
+  contradiction

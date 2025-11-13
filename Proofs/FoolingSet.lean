@@ -2,16 +2,21 @@ import Mathlib.Computability.Language
 import Mathlib.Computability.MyhillNerode
 
 theorem fooling_set_argument {L : Language α} (f : ℕ → List α)
-  (hf : ∀ i j : ℕ, i ≠ j → ∃ z, (f i ++ z) ∈ L ∧ (f j ++ z) ∉ L) : ¬L.IsRegular := by
+  (hf : ∀ i j : ℕ, i < j → ∃ z, (f i ++ z) ∈ L ∧ (f j ++ z) ∉ L) : ¬L.IsRegular := by
 
   let F := fun n => L.leftQuotient (f n)
 
   have F_is_injective : Function.Injective F := by {
-    intro i j
+    intro u v
     contrapose
-    intro i_ne_j
-    obtain ⟨z, h₁, h₂⟩ := hf i j i_ne_j
-    exact ne_of_mem_of_not_mem' h₁ h₂
+    intro u_ne_v
+    cases lt_or_gt_of_ne u_ne_v with
+    | inl u_lt_v =>
+      obtain ⟨z, h₁, h₂⟩ := hf u v u_lt_v
+      exact ne_of_mem_of_not_mem' h₁ h₂
+    | inr v_lt_u =>
+      obtain ⟨z, h₁, h₂⟩ := hf v u v_lt_u
+      exact Ne.symm (ne_of_mem_of_not_mem' h₁ h₂)
   }
 
   let F_within_s : (∀ (x : ℕ), F x ∈ (Set.range L.leftQuotient)) := by {
