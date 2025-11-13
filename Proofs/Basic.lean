@@ -23,16 +23,8 @@ theorem L01_is_irregular : ¬L01.IsRegular := by
     intro h
     obtain ⟨n, hn⟩ := h
 
-    have i_eq_n : i = n := by
-      have := congrArg (fun l => l.count one) hn
-      simp [F, List.count_replicate, zero, one] at this
-      exact this
-
-    have j_eq_n : j = n := by
-      have := congrArg (fun l => l.count zero) hn
-      simp [F, List.count_replicate, zero, one] at this
-      exact this
-
+    have := congrArg (fun l => (l.count one, l.count zero)) hn
+    simp [F, List.count_replicate, zero, one] at this
     omega
 
 def palindrome : Language Bool :=
@@ -48,11 +40,11 @@ theorem palindrome_is_irregular : ¬palindrome.IsRegular := by
 
   simp [F] -- reduces to yz case: 0^j 1 0^i ≠ 0^i 1 0^j
   intro hn
-  have str_diff := congrArg (fun str => str.getD i zero) hn
+  apply congrArg (fun str => str[i]?) at hn
 
-  have x : (List.replicate j zero ++ one :: List.replicate i zero).length = j + 1 + i := by
-    simp
-    omega
+  -- proving that index i is valid
+  let s := List.replicate j zero ++ one :: List.replicate i zero
+  have : s.length = j + 1 + i := by simp [s]; omega
 
-  simp [x, i_lt_j] at str_diff
+  simp [s, this, i_lt_j] at hn
   contradiction
