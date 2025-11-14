@@ -48,3 +48,16 @@ theorem palindrome_is_irregular : ¬palindrome.IsRegular := by
 
   simp [s, this, i_lt_j] at hn
   contradiction
+
+def eq_count : Language Bool :=
+  { w | w.count zero = w.count one }
+
+theorem eq_count_is_irregular : ¬eq_count.IsRegular := by
+  let F := fun n => List.replicate n zero -- fooling set: 0^n
+  refine fooling_set_argument F ?_
+  intro i j i_lt_j
+  exists (List.replicate i one) -- distinguishing suffix: 1^i
+
+  rw [eq_count, Set.mem_setOf_eq, Set.mem_setOf_eq]
+  simp [F, List.count_replicate, zero, one]
+  omega
