@@ -60,4 +60,4 @@ theorem eq_count_is_irregular : ¬eq_count.IsRegular := by
 
   rw [eq_count, Set.mem_setOf_eq, Set.mem_setOf_eq]
   simp [F, List.count_replicate, zero, one]
-  omega
+  exact Nat.ne_of_lt' i_lt_j
