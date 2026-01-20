@@ -4,9 +4,11 @@ import Mathlib.Computability.MyhillNerode
 theorem fooling_set_argument {L : Language α} (f : ℕ → List α)
   (hf : ∀ i j : ℕ, i < j → ∃ z, (f i ++ z) ∈ L ∧ (f j ++ z) ∉ L) : ¬L.IsRegular := by
 
+  refine (mt Language.IsRegular.finite_range_leftQuotient) ?_
   let F := fun n => L.leftQuotient (f n)
+  apply Set.infinite_of_injective_forall_mem (f := F)
 
-  have F_is_injective : Function.Injective F := by {
+  · -- 1) Function.Injective F
     intro u v
     contrapose
     intro u_ne_v
@@ -17,14 +19,7 @@ theorem fooling_set_argument {L : Language α} (f : ℕ → List α)
     | inr v_lt_u =>
       obtain ⟨z, h₁, h₂⟩ := hf v u v_lt_u
       exact Ne.symm (ne_of_mem_of_not_mem' h₁ h₂)
-  }
 
-  let F_within_s : (∀ (x : ℕ), F x ∈ (Set.range L.leftQuotient)) := by {
+  · -- 2) ∀ (x : ℕ), F x ∈ Set.range L.leftQuotient
     intro x
-    exact Set.mem_range_self _
-  }
-
-  have infinite_states : (Set.range L.leftQuotient).Infinite :=
-    Set.infinite_of_injective_forall_mem F_is_injective F_within_s
-
-  exact mt Language.IsRegular.finite_range_leftQuotient infinite_states
+    exact Set.mem_range_self (f x)
